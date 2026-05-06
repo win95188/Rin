@@ -69,20 +69,26 @@ async function handleFeed(c: AppContext, fileName: string) {
 
     const key = path_join(folder, fileName);
     
+    // 1. 尝试获取 R2 缓存
     try {
         const response = await profileAsync(c, 'rss_s3_fetch', () => getStorageObject(env, key));
         if (response) {
             const text = await response.text();
-            return c.text(text, 200, {
-                'Content-Type': contentTypeMap[fileName] || 'application/xml',
-                'Cache-Control': 'public, max-age=3600',
-            });
+            // 如果缓存内容里包含完整的域名（检测是否包含 http），则直接返回
+            if (text.includes('http://') || text.includes('https://')) {
+                return c.text(text, 200, {
+                    'Content-Type': contentTypeMap[fileName] || 'application/xml',
+                    'Cache-Control': 'public, max-age=3600',
+                });
+            }
         }
     } catch (e: any) {}
     
+    // 2. 缓存失效或格式不对，动态生成
     try {
         const url = new URL(c.req.url);
-        const frontendUrl = `${url.protocol}//${url.host}`;
+        // 自动获取当前请求的协议和域名 (e.g., https://blog.cunzhangblog.com)
+        const frontendUrl = `${url.protocol}//${url.host}`; 
         
         const feed = await profileAsync(c, 'rss_generate_feed', () => generateFeed(env, db, frontendUrl, c));
         
@@ -94,6 +100,11 @@ async function handleFeed(c: AppContext, fileName: string) {
         } else {
             content = feed.rss2();
         }
+        
+        // 关键：将带正确域名的内容异步更新到 R2，修复以后其他人的访问
+        c.executionCtx.waitUntil(
+            putStorageObjectAtKey(env, key, content, contentTypeMap[fileName] || 'application/xml')
+        );
         
         return c.text(content, 200, {
             'Content-Type': contentTypeMap[fileName] || 'application/xml',
@@ -111,20 +122,20 @@ async function generateFeed(env: any, db: DB, frontendUrl: string, c?: AppContex
         await initRSSModules();
     }
 
-    // 修正点：使用索引访问 ['SITE_URL'] 绕过 Env 类型定义的限制
-    const baseUrl = env['SITE_URL'] || frontendUrl;
+    // 优先使用环境变量，否则使用动态识别的域名
+    const baseUrl = (env['SITE_URL'] || frontendUrl || "").replace(/\/$/, "");
 
     const feedConfig: any = {
         title: env.RSS_TITLE || "Rin Feed",
         description: env.RSS_DESCRIPTION || "Feed from Rin",
-        id: baseUrl,
-        link: baseUrl,
+        id: baseUrl || "rin-feed",
+        link: baseUrl || "/",
         copyright: `All rights reserved ${new Date().getFullYear()}`,
         generator: "Feed from Rin",
         feedLinks: {
-            rss: `${baseUrl}/rss.xml`,
-            json: `${baseUrl}/rss.json`,
-            atom: `${baseUrl}/atom.xml`,
+            rss: baseUrl ? `${baseUrl}/rss.xml` : `/rss.xml`,
+            json: baseUrl ? `${baseUrl}/rss.json` : `/rss.json`,
+            atom: baseUrl ? `${baseUrl}/atom.xml` : `/atom.xml`,
         },
     };
 
@@ -166,7 +177,10 @@ async function generateFeed(env: any, db: DB, frontendUrl: string, c?: AppContex
         }
 
         const itemPath = f.alias ? `/${f.alias}` : `/feed/${f.id}`;
-        const absoluteLink = baseUrl ? `${baseUrl}${itemPath}` : itemPath;
+        // 确保生成的绝对路径是 https://域名/路径
+        const absoluteLink = baseUrl 
+            ? `${baseUrl}/${itemPath.replace(/^\//, "")}` 
+            : itemPath;
 
         feed.addItem({
             title: f.title || "No title",
@@ -184,12 +198,8 @@ async function generateFeed(env: any, db: DB, frontendUrl: string, c?: AppContex
 }
 
 export async function rssCrontab(env: any, db: DB) {
-    // 自动获取环境变量中的 SITE_URL，确保定时任务生成的链接是完整的
     const baseUrl = env['SITE_URL'] || ""; 
-    
-    // 如果你确定没有环境变量，必须在这里填入一个默认的，否则定时任务生成的 XML 永远没有域名
     const feed = await generateFeed(env, db, baseUrl);
-    
     const folder = env.S3_CACHE_FOLDER || "cache/";
 
     async function save(name: string, data: string) {
