@@ -3,6 +3,7 @@
     "notfound": "About ページを作成するには、記事のエイリアスを about に設定します",
     "title": "概要"
   },
+  "privacy": "プライバシーポリシー",
   "admin": {
     "back_to_site": "サイトに戻る",
     "compat_tasks_description": "過去記事向けの AI 要約と画像 blurhash メタデータを一括補完する互換タスクを実行します。",
