@@ -73,7 +73,7 @@ const FEED_CARD_STYLES: Record<
         meta: "text-gray-400 text-sm",
         // 1. 标题：强制两行高度 (h-[3.5rem])，多出截断 (line-clamp-2)
         title: "text-xl font-bold text-gray-700 dark:text-white text-pretty overflow-hidden line-clamp-2 h-[3.5rem] leading-[1.75rem]",
-        // 3. 摘要：给一个固定高度 (h-[5.5rem])，多出截断 (line-clamp-4)
+        // 3. 摘要：给一个固定高度 (h-[4.125rem])，多出截断 (line-clamp-4)
         summary: "line-clamp-4 text-pretty overflow-hidden dark:text-neutral-500 h-[5.5rem] leading-[1.375rem]",
     },
     editorial: {
