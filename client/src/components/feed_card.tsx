@@ -85,6 +85,7 @@ const FEED_CARD_STYLES: Record<
 
 export type FeedCardProps = {
     id: string;
+    alias?: string; // 已添加：支持别名属性
     avatar?: string;
     draft?: number;
     listed?: number;
@@ -98,7 +99,7 @@ export type FeedCardProps = {
     variant?: FeedCardVariant;
 };
 
-export function FeedCard({ id, title, avatar, draft, listed, top, summary, hashtags, createdAt, updatedAt, preview = false, variant }: FeedCardProps) {
+export function FeedCard({ id, alias, title, avatar, draft, listed, top, summary, hashtags, createdAt, updatedAt, preview = false, variant }: FeedCardProps) {
     const { t } = useTranslation();
     const siteConfig = useSiteConfig();
     const activeVariant = normalizeFeedCardVariant(variant ?? siteConfig.feedCardVariant);
@@ -139,5 +140,8 @@ export function FeedCard({ id, title, avatar, draft, listed, top, summary, hasht
         </div>
     );
 
-    return preview ? body : <Link href={`/feed/${id}`} target="_blank" className="block w-full">{body}</Link>;
+    // 修改跳转逻辑：优先使用 alias 路径[cite: 3]
+    const targetHref = alias ? `/${alias}` : `/feed/${id}`;
+
+    return preview ? body : <Link href={targetHref} target="_blank" className="block w-full">{body}</Link>;
 }
