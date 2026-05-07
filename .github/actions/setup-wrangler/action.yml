@@ -26,7 +26,7 @@ runs:
         not_found_handling = "single-page-application"
 
         [triggers]
-        crons = ["*/20 * * * *"]
+        crons = ["0 */2 * * *"]
 
         [vars]
         S3_FOLDER = "images/"
