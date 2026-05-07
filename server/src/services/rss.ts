@@ -131,7 +131,7 @@ async function generateFeed(env: any, db: DB, frontendUrl: string, c?: AppContex
     const queryConfig = {
         where: and(eq(feeds.draft, 0), eq(feeds.listed, 1)),
         orderBy: [desc(feeds.createdAt), desc(feeds.updatedAt)],
-        limit: 20,
+        limit: 100,
         columns: {
             id: true,
             alias: true, 
