@@ -4,23 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- 1. 核心 SEO 标题 -->
     <title>Web3村长 | AI工具、区块链实操、网络媒体运营 - 探索技术出海与变现</title>
     
-    <!-- 2. 搜索结果描述 - 决定用户在搜索结果里看到的介绍 -->
     <meta name="description" content="Web3村长技术博客，专注分享AI工具实操（如OpenAI, Minimax,DeepSeek）、区块链技术、自媒体运营及SEO优化经验，带你探索技术出海与变现的无限可能。" />
     <meta name="keywords" content="Web3村长, AI工具, 区块链实操, 技术出海, 区块链, 网络运营, SEO优化" />
 
-    <!-- 3. Open Graph 协议 - 让你的链接在社交软件(TG/Twitter)上显示精美卡片 -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Web3村长 | AI工具、区块链实操、网络媒体运营" />
     <meta property="og:description" content="探索技术出海与变现，分享最新AI与Web3实操干货。" />
     <meta property="og:url" content="https://www.cunzhangblog.com/" />
-    <!-- 建议在根目录放一张封面图命名为 og-image.png -->
     <meta property="og:image" content="https://www.cunzhangblog.com/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- 4. 结构化数据 - 帮助 Google 识别你的身份 -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -34,7 +29,17 @@
       "description": "专注AI工具实操、区块链与网络媒体运营的深度技术博客。"
     }
     </script>
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '%VITE_GA_ID%');
+    </script>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=%VITE_ADSENSE_ID%" crossorigin="anonymous"></script>
+
     <script>
       // 将上面的标题自动同步给全局变量，供 React 路由读取
       window.SEO_TITLE = document.title;
